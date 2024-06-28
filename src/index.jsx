@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import Popup from "./components/Popup";
+import Menu from "./components/Menu";
 
 const rootElement = document.getElementById("root");
-ReactDOM.render(<Popup />, rootElement);
+ReactDOM.render(<Menu />, rootElement);

@@ -1,18 +1,31 @@
-chrome.runtime.onInstalled.addListener(function () {
-  console.log("Extension installed");
-  // Set up extension defaults, initialize storage, etc.
-});
+let isEnabled = false;
 
-chrome.tabs.onActivated.addListener((activeInfo) => {
-  console.log("Tab changed", activeInfo);
-  // Perform actions when the user switches tabs
-});
+const toggleExtension = async (tabId) => {
+  isEnabled = !isEnabled;
+  const action = isEnabled ? "enable" : "disable";
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "logMessage") {
-    console.log("Message received from content script:", message.content);
-  }
-  // Send a response back to the sender
-  sendResponse({ status: "Message received" });
-  return true; // Keep the messaging channel open for asynchronous response
+  await chrome.scripting.executeScript({
+    target: { tabId: tabId },
+    func: (action) => {
+      if (action === "enable") {
+        document.body.dataset.extensionEnabled = "true";
+      } else {
+        delete document.body.dataset.extensionEnabled;
+      }
+    },
+    args: [action],
+  });
+
+  updateIcon();
+};
+
+const updateIcon = () => {
+  const iconPath = isEnabled
+    ? "images/icon-enabled.png"
+    : "images/icon-disabled.png";
+  chrome.action.setIcon({ path: iconPath });
+};
+
+chrome.action.onClicked.addListener((tab) => {
+  toggleExtension(tab.id);
 });
